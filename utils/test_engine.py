@@ -1,6 +1,5 @@
 # --------------------------------------------------------
 # OpenVQA
-# Licensed under The MIT License [see LICENSE for details]
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
@@ -29,9 +28,9 @@ def test_engine(__C, dataset, state_dict=None, validation=False):
     # val_ckpt_flag = False
     if state_dict is None:
         # val_ckpt_flag = True
-        print('Loading the {}'.format(path))
+        print('Loading ckpt from: {}'.format(path))
         state_dict = torch.load(path)['state_dict']
-        print('Finish loading ckpt !!!')
+        print('Finish!')
 
     # Store the prediction list
     # qid_list = [ques['question_id'] for ques in dataset.ques_list]
@@ -68,7 +67,7 @@ def test_engine(__C, dataset, state_dict=None, validation=False):
     for step, (
             frcn_feat_iter,
             grid_feat_iter,
-            spat_feat_iter,
+            bbox_feat_iter,
             ques_ix_iter,
             ans_iter
     ) in enumerate(dataloader):
@@ -80,13 +79,13 @@ def test_engine(__C, dataset, state_dict=None, validation=False):
 
         frcn_feat_iter = frcn_feat_iter.cuda()
         grid_feat_iter = grid_feat_iter.cuda()
-        spat_feat_iter = spat_feat_iter.cuda()
+        bbox_feat_iter = bbox_feat_iter.cuda()
         ques_ix_iter = ques_ix_iter.cuda()
 
         pred = net(
             frcn_feat_iter,
             grid_feat_iter,
-            spat_feat_iter,
+            bbox_feat_iter,
             ques_ix_iter
         )
         pred_np = pred.cpu().data.numpy()
