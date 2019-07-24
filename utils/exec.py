@@ -1,5 +1,6 @@
 # --------------------------------------------------------
 # OpenVQA
+# Licensed under The MIT License [see LICENSE for details]
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
@@ -12,7 +13,7 @@ class Execution:
     def __init__(self, __C):
         self.__C = __C
 
-        print('Loading dataset........')
+        print('Loading dataset ........')
         self.dataset = DatasetLoader(__C).DataSet()
 
         # If trigger the evaluation after every epoch
@@ -22,7 +23,7 @@ class Execution:
             __C_eval = copy.deepcopy(__C)
             setattr(__C_eval, 'RUN_MODE', 'val')
 
-            print('Loading validation set for per-epoch evaluation........')
+            print('Loading eval every epoch dataset ........')
             self.dataset_eval = DatasetLoader(__C_eval).DataSet()
 
 
@@ -42,8 +43,8 @@ class Execution:
 
 
     def empty_log(self, version):
-        print('Initializing log file........')
+        print('Empty the log file ........')
         if (os.path.exists(self.__C.LOG_PATH + '/log_run_' + version + '.txt')):
             os.remove(self.__C.LOG_PATH + '/log_run_' + version + '.txt')
-        print('Finished!')
+        print('Finished !!!')
         print('')

@@ -1,5 +1,6 @@
 # --------------------------------------------------------
 # OpenVQA
+# Licensed under The MIT License [see LICENSE for details]
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
@@ -90,6 +91,30 @@ class PATH:
 
         }
 
+        self.FEATURES = {
+            'vqa': {
+                'FRCN_FEATURE': True,
+                'SPATIAL_FEATURE': False,
+                'GRID_FEATURE': False,
+                'FRCNFEAT_SIZE': 2048,
+                'SPATFEAT_EMB_SIZE': 2048,
+            },
+            'gqa': {
+                'FRCN_FEATURE': True,
+                'SPATIAL_FEATURE': True,
+                'GRID_FEATURE': True,
+                'FRCNFEAT_SIZE': 2048,
+                'SPATFEAT_EMB_SIZE': 2048,
+                'GRIDFEAT_SIZE': 2048,
+            },
+            'clevr': {
+                'FRCN_FEATURE': False,
+                'SPATIAL_FEATURE': False,
+                'GRID_FEATURE': True,
+                'GRIDFEAT_SIZE': 1024,
+            },
+        }
+
 
         self.RESULT_PATH = './results/result_test'
         self.PRED_PATH = './results/pred'
@@ -114,7 +139,7 @@ class PATH:
 
 
     def check_path(self, dataset=None):
-        print('Checking dataset ........')
+        print('Check dataset ........')
 
 
         if dataset:
@@ -141,6 +166,6 @@ class PATH:
                         print(self.RAW_PATH[dataset][item], 'NOT EXIST')
                         exit(-1)
 
-        print('Finished!')
+        print('Check successfully ........')
         print('')
 

@@ -1,9 +1,10 @@
 # --------------------------------------------------------
 # OpenVQA
+# Licensed under The MIT License [see LICENSE for details]
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
-import os, torch, datetime, shutil, time
+import os, torch, datetime, shutil
 import numpy as np
 import torch.nn as nn
 import torch.utils.data as Data
@@ -52,9 +53,9 @@ def train_engine(__C, dataset, dataset_eval=None):
                    '/epoch' + str(__C.CKPT_EPOCH) + '.pkl'
 
         # Load the network parameters
-        print('Loading ckpt from {}'.format(path))
+        print('Loading the {}'.format(path))
         ckpt = torch.load(path)
-        print('Finish!')
+        print('Finish loading ckpt !!!')
         net.load_state_dict(ckpt['state_dict'])
         start_epoch = ckpt['epoch']
 
@@ -62,14 +63,12 @@ def train_engine(__C, dataset, dataset_eval=None):
         optim = get_optim(__C, net, data_size, ckpt['lr_base'])
         optim._step = int(data_size / __C.BATCH_SIZE * start_epoch)
         optim.optimizer.load_state_dict(ckpt['optimizer'])
-        
-        if ('ckpt_' + __C.VERSION) not in os.listdir(__C.CKPTS_PATH):
-            os.mkdir(__C.CKPTS_PATH + '/ckpt_' + __C.VERSION)
 
     else:
-        if ('ckpt_' + __C.VERSION) not in os.listdir(__C.CKPTS_PATH):
-            #shutil.rmtree(__C.CKPTS_PATH + '/ckpt_' + __C.VERSION)
-            os.mkdir(__C.CKPTS_PATH + '/ckpt_' + __C.VERSION)
+        if ('ckpt_' + __C.VERSION) in os.listdir(__C.CKPTS_PATH):
+            shutil.rmtree(__C.CKPTS_PATH + '/ckpt_' + __C.VERSION)
+
+        os.mkdir(__C.CKPTS_PATH + '/ckpt_' + __C.VERSION)
 
         optim = get_optim(__C, net, data_size)
         start_epoch = 0
@@ -98,14 +97,6 @@ def train_engine(__C, dataset, dataset_eval=None):
         drop_last=True
     )
 
-    logfile = open(
-        __C.LOG_PATH +
-        '/log_run_' + __C.VERSION + '.txt',
-        'a+'
-    )
-    logfile.write(str(__C))
-    logfile.close()
-
     # Training script
     for epoch in range(start_epoch, __C.MAX_EPOCH):
 
@@ -116,7 +107,7 @@ def train_engine(__C, dataset, dataset_eval=None):
             'a+'
         )
         logfile.write(
-            '=====================================\nnowTime: ' +
+            'nowTime: ' +
             datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') +
             '\n'
         )
@@ -130,12 +121,11 @@ def train_engine(__C, dataset, dataset_eval=None):
         # if __C.SHUFFLE_MODE == 'external':
         #     dataset.shuffle_list(dataset.ans_list)
 
-        time_start = time.time()
         # Iteration
         for step, (
                 frcn_feat_iter,
                 grid_feat_iter,
-                bbox_feat_iter,
+                spat_feat_iter,
                 ques_ix_iter,
                 ans_iter
         ) in enumerate(dataloader):
@@ -144,7 +134,7 @@ def train_engine(__C, dataset, dataset_eval=None):
 
             frcn_feat_iter = frcn_feat_iter.cuda()
             grid_feat_iter = grid_feat_iter.cuda()
-            bbox_feat_iter = bbox_feat_iter.cuda()
+            spat_feat_iter = spat_feat_iter.cuda()
             ques_ix_iter = ques_ix_iter.cuda()
             ans_iter = ans_iter.cuda()
 
@@ -156,8 +146,8 @@ def train_engine(__C, dataset, dataset_eval=None):
                 sub_grid_feat_iter = \
                     grid_feat_iter[accu_step * __C.SUB_BATCH_SIZE:
                                   (accu_step + 1) * __C.SUB_BATCH_SIZE]
-                sub_bbox_feat_iter = \
-                    bbox_feat_iter[accu_step * __C.SUB_BATCH_SIZE:
+                sub_spat_feat_iter = \
+                    spat_feat_iter[accu_step * __C.SUB_BATCH_SIZE:
                                   (accu_step + 1) * __C.SUB_BATCH_SIZE]
                 sub_ques_ix_iter = \
                     ques_ix_iter[accu_step * __C.SUB_BATCH_SIZE:
@@ -169,7 +159,7 @@ def train_engine(__C, dataset, dataset_eval=None):
                 pred = net(
                     sub_frcn_feat_iter,
                     sub_grid_feat_iter,
-                    sub_bbox_feat_iter,
+                    sub_spat_feat_iter,
                     sub_ques_ix_iter
                 )
 
@@ -219,10 +209,7 @@ def train_engine(__C, dataset, dataset_eval=None):
 
             optim.step()
 
-        time_end = time.time()
-        elapse_time = time_end-time_start
-        print('Finished in {}s'.format(int(elapse_time)))
-        #print('')
+        print('')
         epoch_finish = epoch + 1
 
         # Save checkpoint
@@ -247,11 +234,10 @@ def train_engine(__C, dataset, dataset_eval=None):
             'a+'
         )
         logfile.write(
-            'Epoch: ' + str(epoch_finish) +
-            ', Loss: ' + str(loss_sum / data_size) +
-            ', Lr: ' + str(optim._rate) + '\n' +
-            'Elapsed time: ' + str(int(elapse_time)) + 
-            ', Speed(s/batch): ' + str(elapse_time/step) + 
+            'epoch = ' + str(epoch_finish) +
+            '  loss = ' + str(loss_sum / data_size) +
+            '\n' +
+            'lr = ' + str(optim._rate) +
             '\n\n'
         )
         logfile.close()

@@ -1,5 +1,6 @@
 # --------------------------------------------------------
 # OpenVQA
+# Licensed under The MIT License [see LICENSE for details]
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
@@ -61,7 +62,7 @@ class DataSet(BaseDataSet):
 
         # Define run data size
         self.data_size = self.ques_dict.__len__()
-        print(' ========== Dataset size:', self.data_size)
+        print(' ========== run data size:', self.data_size)
 
 
         # ------------------------
@@ -78,18 +79,18 @@ class DataSet(BaseDataSet):
         # Tokenize
         self.token_to_ix, self.pretrained_emb, max_token = self.tokenize(stat_ques_dict, __C.USE_GLOVE)
         self.token_size = self.token_to_ix.__len__()
-        print(' ========== Question token vocab size:', self.token_size)
+        print(' ========== question token size:', self.token_size)
 
         self.max_token = -1
         if self.max_token == -1:
             self.max_token = max_token
-        print('Max token length:', max_token, 'Trimmed to:', self.max_token)
+        print('Max token length:', max_token, 'Cutting to:', self.max_token)
 
         # Answers statistic
         self.ans_to_ix, self.ix_to_ans = self.ans_stat(stat_ans_dict)
         self.ans_size = self.ans_to_ix.__len__()
-        print(' ========== Answer token vocab size:', self.ans_size)
-        print('Finished!')
+        print(' ========== answer size:', self.ans_size)
+        print('Loading finished !!!')
         print('')
 
 
@@ -185,15 +186,15 @@ class DataSet(BaseDataSet):
         grid_feat = np.load(self.iid_to_grid_feat_path[iid])
         grid_feat_iter = grid_feat['x']
 
-        bbox_feat_iter = self.proc_img_feat(
-            self.proc_bbox_feat(
+        spat_feat_iter = self.proc_img_feat(
+            self.proc_spat_feat(
                 frcn_feat['bbox'],
                 (frcn_feat['height'], frcn_feat['width'])
             ),
             img_feat_pad_size=100
         )
 
-        return frcn_feat_iter, grid_feat_iter, bbox_feat_iter
+        return frcn_feat_iter, grid_feat_iter, spat_feat_iter
 
 
 
@@ -215,16 +216,16 @@ class DataSet(BaseDataSet):
         return img_feat
 
 
-    def proc_bbox_feat(self, bbox, img_shape):
-        bbox_feat = np.zeros((bbox.shape[0], 5), dtype=np.float32)
+    def proc_spat_feat(self, bbox, img_shape):
+        spat_feat = np.zeros((bbox.shape[0], 5), dtype=np.float32)
 
-        bbox_feat[:, 0] = bbox[:, 0] / float(img_shape[1])
-        bbox_feat[:, 1] = bbox[:, 1] / float(img_shape[0])
-        bbox_feat[:, 2] = bbox[:, 2] / float(img_shape[1])
-        bbox_feat[:, 3] = bbox[:, 3] / float(img_shape[0])
-        bbox_feat[:, 4] = (bbox[:, 2] - bbox[:, 0]) * (bbox[:, 3] - bbox[:, 1]) / float(img_shape[0] * img_shape[1])
+        spat_feat[:, 0] = bbox[:, 0] / float(img_shape[1])
+        spat_feat[:, 1] = bbox[:, 1] / float(img_shape[0])
+        spat_feat[:, 2] = bbox[:, 2] / float(img_shape[1])
+        spat_feat[:, 3] = bbox[:, 3] / float(img_shape[0])
+        spat_feat[:, 4] = (bbox[:, 2] - bbox[:, 0]) * (bbox[:, 3] - bbox[:, 1]) / float(img_shape[0] * img_shape[1])
 
-        return bbox_feat
+        return spat_feat
 
 
     def proc_ques(self, ques, token_to_ix, max_token):

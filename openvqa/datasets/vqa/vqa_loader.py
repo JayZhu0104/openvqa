@@ -1,5 +1,6 @@
 # --------------------------------------------------------
 # OpenVQA
+# Licensed under The MIT License [see LICENSE for details]
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
@@ -51,7 +52,7 @@ class DataSet(BaseDataSet):
         else:
             self.data_size = self.ques_list.__len__()
 
-        print(' ========== Dataset size:', self.data_size)
+        print(' ========== run data size:', self.data_size)
 
 
         # ------------------------
@@ -67,13 +68,13 @@ class DataSet(BaseDataSet):
         # Tokenize
         self.token_to_ix, self.pretrained_emb = self.tokenize(stat_ques_list, __C.USE_GLOVE)
         self.token_size = self.token_to_ix.__len__()
-        print(' ========== Question token vocab size:', self.token_size)
+        print(' ========== question token size:', self.token_size)
 
         # Answers statistic
         self.ans_to_ix, self.ix_to_ans = self.ans_stat(stat_ans_list, ans_freq=8)
         self.ans_size = self.ans_to_ix.__len__()
-        print(' ========== Answer token vocab size (occur more than {} times):'.format(8), self.ans_size)
-        print('Finished!')
+        print(' ========== answer frequency more than {} size:'.format(8), self.ans_size)
+        print('Loading finished !!!')
         print('')
 
 
@@ -189,15 +190,7 @@ class DataSet(BaseDataSet):
         frcn_feat_x = frcn_feat['x'].transpose((1, 0))
         frcn_feat_iter = self.proc_img_feat(frcn_feat_x, img_feat_pad_size=100)
 
-        bbox_feat_iter = self.proc_img_feat(
-            self.proc_bbox_feat(
-                frcn_feat['bbox'],
-                (frcn_feat['image_h'], frcn_feat['image_w'])
-            ),
-            img_feat_pad_size=100
-        )
-
-        return frcn_feat_iter, np.zeros(1), bbox_feat_iter
+        return frcn_feat_iter, np.zeros(1), np.zeros(1)
 
 
 
@@ -217,18 +210,6 @@ class DataSet(BaseDataSet):
         )
 
         return img_feat
-
-
-    def proc_bbox_feat(self, bbox, img_shape):
-        bbox_feat = np.zeros((bbox.shape[0], 5), dtype=np.float32)
-
-        bbox_feat[:, 0] = bbox[:, 0] / float(img_shape[1])
-        bbox_feat[:, 1] = bbox[:, 1] / float(img_shape[0])
-        bbox_feat[:, 2] = bbox[:, 2] / float(img_shape[1])
-        bbox_feat[:, 3] = bbox[:, 3] / float(img_shape[0])
-        bbox_feat[:, 4] = (bbox[:, 2] - bbox[:, 0]) * (bbox[:, 3] - bbox[:, 1]) / float(img_shape[0] * img_shape[1])
-
-        return bbox_feat
 
 
     def proc_ques(self, ques, token_to_ix, max_token):
