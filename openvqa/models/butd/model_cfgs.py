@@ -20,3 +20,4 @@ class Cfgs(BaseCfgs):
         self.FLAT_GLIMPSES = 1
         self.FLAT_OUT_SIZE = 1024
         self.QUESTION_EMBED_SIZE = 1024
+        self.CLASSIFER_DROPOUT_R = 0.5
