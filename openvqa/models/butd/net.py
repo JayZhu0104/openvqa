@@ -117,7 +117,7 @@ class Net(nn.Module):
 
         lang_feat = self.backbone(
             lang_feat,
-            img_feat,
+            img_feat
         )
 
         # Classification layers

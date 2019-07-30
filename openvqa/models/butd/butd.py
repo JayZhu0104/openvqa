@@ -149,7 +149,7 @@ class BUTD(nn.Module):
         self.q_net = FCNet([__C.HIDDEN_SIZE, __C.HIDDEN_SIZE])
         self.v_net = FCNet([__C.FF_SIZE, __C.HIDDEN_SIZE])
     def forward(self, x, y):
-        v_att=NewAttention(y,x)
-        q_net=self.q_net()
+        v_att = NewAttention(y, x)
+        q_net = self.q_net()
         v_net = self.v_net()
         return BM(x, v_att, q_net, v_net)
