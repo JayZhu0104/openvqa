@@ -73,6 +73,7 @@ class NewAttention(nn.Module):
     def __init__(self, __C):
         super(NewAttention, self).__init__()
 
+        self.__C = __C
         #这里的参数名还没确定，只是把model_cfgs中等值的参数名传了过去
         self.v_proj = FCNet([__C.HIDDEN_SIZE, __C.HIDDEN_SIZE])
         self.q_proj = FCNet([__C.FF_SIZE, __C.HIDDEN_SIZE])
@@ -146,10 +147,11 @@ class BM(nn.Module):
 class BUTD(nn.Module):
     def __init__(self, __C):
         super(BUTD, self).__init__()
+        self.newattention = NewAttention(__C)
         self.q_net = FCNet([__C.HIDDEN_SIZE, __C.HIDDEN_SIZE])
         self.v_net = FCNet([__C.FF_SIZE, __C.HIDDEN_SIZE])
     def forward(self, x, y):
-        v_att = NewAttention(y, x)
+        v_att = self.newattention(y, x)
         q_net = self.q_net()
         v_net = self.v_net()
         return BM(x, v_att, q_net, v_net)
